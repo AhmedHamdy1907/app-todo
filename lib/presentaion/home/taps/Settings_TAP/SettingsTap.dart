@@ -22,12 +22,12 @@ class SettingstapState extends State<Settingstap> {
             "Theme",
             style: AppLigthStayel.settingsItemTextStyel
           ),
-          SizedBox(
+          const SizedBox(
             height: 8,
           ),
           Container(
             height: 50,
-            padding: EdgeInsets.symmetric(vertical: 12,horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 12,horizontal: 8),
             width: double.infinity,
             decoration: BoxDecoration(
               color: ColorsManger.WhiteColors,
@@ -39,7 +39,7 @@ class SettingstapState extends State<Settingstap> {
                   SelectedTheme??"" ,
                   style: AppLigthStayel.ItemViweStayel,
                 ),
-                Spacer(),
+                const Spacer(),
                 DropdownButton<String>(
                   value: SelectedTheme,
                   underline: Container(color: Colors.white,),
@@ -64,17 +64,17 @@ class SettingstapState extends State<Settingstap> {
               ],
             ),
           ),
-          SizedBox(height: 14,),
+          const SizedBox(height: 14,),
           Text(
             "Language",
             style: AppLigthStayel.settingsItemTextStyel
           ),
-          SizedBox(
+          const SizedBox(
             height: 8,
           ),
           Container(
             height: 50,
-            padding: EdgeInsets.symmetric(vertical: 12,horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 12,horizontal: 8),
             width: double.infinity,
             decoration: BoxDecoration(
                 color: ColorsManger.ligthcard,
@@ -86,7 +86,7 @@ class SettingstapState extends State<Settingstap> {
                   SelectedLangauge??"",
                   style: AppLigthStayel.ItemViweStayel,
                 ),
-                Spacer(),
+                const Spacer(),
                 DropdownButton<String>(
                   value: SelectedLangauge,
                   underline: Container(color: Colors.white,),

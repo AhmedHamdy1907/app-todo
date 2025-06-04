@@ -1,184 +1,264 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:todo_app/core/Routes_manegar/routes_manger.dart';
 import 'package:todo_app/core/reusable_component/custem_text_form_field.dart';
 import 'package:todo_app/core/strings_manger/strings_manger.dart';
 import '../../../core/assets_manger/assets_manger.dart';
-class RegisterScreen extends StatelessWidget {
-  TextEditingController fullNameController = TextEditingController();
-  TextEditingController userNameController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController rePasswordController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
+import '../../../core/constant_manager.dart';
+import '../../../core/dialog/dialogs.dart';
+import '../../../core/emial_validation.dart';
+import '../../../core/strings_manager.dart';
+import '../../../core/text_manger/textStyles.dart';
+import '../../../data_base_manger/model/user_DM.dart';
+import '../widgets/custom_text_field.dart';
+
+class RegisterScreen extends StatefulWidget {
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  late TextEditingController fullNameController;
+  late TextEditingController userNameController;
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
+  late TextEditingController rePasswordController;
+
+  GlobalKey<FormState> formKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    fullNameController = TextEditingController();
+    userNameController = TextEditingController();
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+    rePasswordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    fullNameController.dispose();
+    userNameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    rePasswordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.blue.shade900,
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              SizedBox(
-                height: 50,
-              ),
-              SvgPicture.asset(AssetsManger.routLogo),
-              SizedBox(
-                height: 50,
-              ),
-              Expanded(
-                child: ListView(
+    return Scaffold(
+      backgroundColor: Colors.blue.shade900,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SingleChildScrollView(
+          child: Form(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SvgPicture.asset(
+                  AssetsManger.routLogo,
+                  width: 237.w,
+                  height: 71.h,
+                ),
+                const Text('Full name',  style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(height: 12.h),
+                CustomTextField(
+                  validator: (input) {
+                    if (input == null || input.trim().isEmpty) {
+                      return 'Plz, enter full name';
+                    }
+                    return null;
+                  },
+                  controller: fullNameController,
+                  hintText: ConstantManager.fullName,
+                  keyboardType: TextInputType.name,
+                ),
+                SizedBox(height: 12.h),
+                const Text('user name' , style: TextStyle(color: Colors.white),),
+                SizedBox(height: 12.h),
+                CustomTextField(
+                  validator: (input) {
+                    if (input == null || input.trim().isEmpty) {
+                      return 'Plz, enter user name';
+                    }
+                    return null;
+                  },
+                  controller: userNameController,
+                  hintText: ConstantManager.userName,
+                  keyboardType: TextInputType.name,
+                ),
+                SizedBox(height: 12.h),
+                const Text('Email address' , style: TextStyle(color: Colors.white)),
+                SizedBox(height: 12.h),
+                CustomTextField(
+                  validator: (input) {
+                    if (input == null || input.trim().isEmpty) {
+                      return 'Plz, enter emil';
+                    }
+                    if (!isValidEmail(input)) {
+                      return 'Email bad format';
+                    }
+                    return null;
+                  },
+                  controller: emailController,
+                  hintText: ConstantManager.email,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                SizedBox(height: 12.h),
+                const Text('Password' , style: TextStyle(color: Colors.white)),
+                SizedBox(height: 12.h),
+                CustomTextField(
+                  validator: (input) {
+                    if (input == null || input.trim().isEmpty) {
+                      return 'Plz, enter password';
+                    }
+                    return null;
+                  },
+                  controller: passwordController,
+                  hintText: ConstantManager.password,
+                  keyboardType: TextInputType.visiblePassword,
+                  isSecureText: true,
+                ),
+                SizedBox(height: 12.h),
+                const Text('Re-password' , style: TextStyle(color: Colors.white)),
+                SizedBox(height: 12.h),
+                CustomTextField(
+                  validator: (input) {
+                    if (input == null || input.trim().isEmpty) {
+                      return 'Plz, enter re-password';
+                    }
+                    if (input != passwordController.text) {
+                      return "Password doesn't match";
+                    }
+                    return null;
+                  },
+                  controller: rePasswordController,
+                  hintText: ConstantManager.passwordConfirmation,
+                  keyboardType: TextInputType.visiblePassword,
+                  isSecureText: true,
+                ),
+                SizedBox(height: 12.h),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.r)),
+                    padding: REdgeInsets.symmetric(vertical: 11),
+                  ),
+                  onPressed: () {
+                    register();
+                  },
+                  child: const Text('Sign-Up' , style: TextStyle(color: Colors.black)),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    buildTitle("Full name"),
-                    buildFullNameFormFelid(),
-                    buildTitle("UserName"),
-                    buildUserNameFormField(),
-                    buildTitle("E-mail"),
-                    buildEmailFormField(),
-                    buildTitle("Password"),
-                    buildPasswordFormField(),
-                    buildTitle("Re-Password"),
-                    buildRePasswordFormField(),
-                    const SizedBox(
-                      height: 20,
+                    const Text(
+                      "Don't have an account?",
+                      style: TextStyle(color: Colors.cyanAccent),
                     ),
-                    buildMatirialButton(),
-                    buildTitlePushLoginScreen(context)
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(
+                          context,
+                          RoutesManger.login,
+                        );
+                      },
+                      child: const Text(
+                        "Sign in",
+                        style: TextStyle(
+                          decoration: TextDecoration.underline,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget buildFullNameFormFelid() => Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CustemTextFormField(
-          controller: fullNameController,
-          hintTex: "full name",
-          validator: (input) {
-            if (input == null || input.trim().isEmpty) {
-              return " Plz ,enter Full name";
-            }
-            return null;
-          },
-        ),
+  void register() async {
+    if (formKey.currentState?.validate() == false) return;
+
+    try {
+      MyDialog.showLoading(context,
+          loadingMessage: 'Waiting...', isDismissible: false);
+
+      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
       );
 
-  Widget buildUserNameFormField() => Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CustemTextFormField(
-          controller: userNameController,
-          hintTex: "enter user name",
-          validator: (input) {
-            if (input == null || input.trim().isEmpty) {
-              return " Plz ,enter user name";
-            }
-            return null;
-          },
-        ),
-      );
+      await addUserToFireStore(credential.user!.uid);
 
-  Widget buildEmailFormField() => Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CustemTextFormField(
-          controller: emailController,
-          hintTex: "enter your email ",
-          validator: (input) {
-            if (input == null || input.trim().isEmpty) {
-              return " Plz ,enter email-address";
-            }
-            return null;
-            //check email format
-          },
-        ),
-      );
+      if (!mounted) return;
+      MyDialog.hide(context);
 
-  Widget buildPasswordFormField() => Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CustemTextFormField(
-          isScecure: true,
-          controller: passwordController,
-          hintTex: "enter Your Password",
-          validator: (input) {
-            if (input == null || input.trim().isEmpty) {
-              return " Plz ,enter Password";
-            }
-            if (input.length < 6) {
-              return "sorry ,Password should be at least 6 chars";
-            }
-            return null;
-          },
-        ),
-      );
+      if (!mounted) return;
+      MyDialog.showMessage(context,
+          body: 'User registered successfully',
+          posActionTitle: 'Ok', posAction: () {
+            Navigator.pushReplacementNamed(context, RoutesManger.login);
+          });
+    } on FirebaseAuthException catch (authError) {
+      if (mounted) {
+        MyDialog.hide(context);
+      }
+      late String message;
+      if (authError.code == ConstantManager.weakPassword) {
+        message = StringsManager.weakPasswordMessage;
+      } else if (authError.code == ConstantManager.emailInUse) {
+        message = StringsManager.emailInUseMessage;
+      } else {
+        message = authError.message ?? 'An error occurred';
+      }
+      if (mounted) {
+        MyDialog.showMessage(
+          context,
+          title: 'Error',
+          body: message,
+          posActionTitle: 'OK',
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        MyDialog.hide(context);
+        MyDialog.showMessage(context,
+            title: 'Error',
+            body: error.toString(),
+            posActionTitle: 'Try again');
+      }
+    }
+  }
 
-  Widget buildRePasswordFormField() => Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CustemTextFormField(
-          isScecure: true,
-          controller: rePasswordController,
-          hintTex: "enter Your re-Password",
-          validator: (input) {
-            if (input == null || input.trim().isEmpty) {
-              return " Plz ,enter re-Password";
-            }
-            if (input.length < 6) {
-              return "sorry ,Password should be at least 6 chars";
-            }
-            return null;
-          },
-        ),
-      );
+  Future<void> addUserToFireStore(String uid) async {
+    UserDM userDM = UserDM(
+      id: uid,
+      fullName: fullNameController.text,
+      userName: userNameController.text,
+      email: emailController.text,
+    );
+    CollectionReference usersCollection =
+    FirebaseFirestore.instance.collection(UserDM.collectionName);
+    DocumentReference userDocument = usersCollection.doc(uid);
+    await userDocument.set(userDM.toFireStore());
 
-  Widget buildTitle(String title) => Text(
-        title,
-        style: TextStyle(
-            fontSize: 14, color: Colors.white, fontWeight: FontWeight.w400),
-      );
-
-  Widget buildMatirialButton() => Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: MaterialButton(
-        padding: EdgeInsets.all(1),
-        height: 50,
-        shape:
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        color: Colors.white,
-        onPressed: () {},
-        child: Text(
-         StringsManger.SignUp,
-          style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0XFF004182)),
-        )),
-  );
-
-  Widget buildTitlePushLoginScreen(BuildContext context) => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            "Already have Account?",
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.normal),
-          ),
-          TextButton(
-              onPressed: () {
-                Navigator.pushReplacementNamed(context, RoutesManger.login);
-              },
-              child: Text(
-                StringsManger.SignIn,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
-                    decoration: TextDecoration.underline),
-              ))
-        ],
-      );
+    print('User data added to Firestore for UID: $uid');
+  }
 }
